@@ -1,9 +1,10 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { authActions } from "../Store/Slices/AuthSlice";
+import { cartActions } from "../Store/Slices/CartSlice";
 const Navbar = () => {
   const authStatus = useSelector((Store) => Store.auth.loginStatus);
-  const cart = useSelector((Store) => Store.cart.cart);
+  const cart = useSelector((Store) => Store.cart.cart.cartItems);
   // let cartStatus = cart.length > 0 ? cart.length : 0;
   let netQuantity = 0;
   for (let i = 0; i < cart.length; i++) {
@@ -18,6 +19,10 @@ const Navbar = () => {
     e.preventDefault();
     dispatch(authActions.logout());
   };
+  const toggleCart = (e) => {
+    e.preventDefault();
+    dispatch(cartActions.toggleCart());
+  };
   return (
     <header className="bg-purple-400 p-3">
       <nav className="max-w-5xl mx-auto flex justify-between items-center">
@@ -28,7 +33,9 @@ const Navbar = () => {
           </li>
           {authStatus && (
             <li className="px-3 py-1 mx-1 text-white text-base font-thin ">
-              <a href="">Cart {netQuantity}</a>
+              <a href="" onClick={toggleCart}>
+                Cart {netQuantity}
+              </a>
             </li>
           )}
 

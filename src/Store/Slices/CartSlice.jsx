@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 const initialCartState = {
-  cart: [],
+  cart: { cartItems: [], totalPrice: 0, visibility: false },
 };
 const cartSlice = createSlice({
   name: "cart",
@@ -31,7 +31,8 @@ const cartSlice = createSlice({
     addToCart(state, action) {
       const id = action.payload.id;
       const item = action.payload;
-      const cart = state.cart.slice(); // create a copy of the cart array
+      let cartPrice = state.cart.totalPrice;
+      const cart = state.cart.cartItems.slice(); // create a copy of the cart array
 
       const existingItemIndex = cart.findIndex((item) => item.id === id);
       if (existingItemIndex !== -1) {
@@ -41,12 +42,51 @@ const cartSlice = createSlice({
           ...existingItem,
           quantity: +existingItem.quantity + 1,
         };
+        cartPrice += +item.price;
         cart[existingItemIndex] = updatedItem;
       } else {
         // item does not exist in cart
         cart.push(item);
+        cartPrice += +item.price;
       }
-      state.cart = cart;
+      state.cart = {
+        cartItems: cart,
+        totalPrice: cartPrice,
+        visibility: state.visibility,
+      };
+    },
+    removeFromCart(state, action) {
+      const id = action.payload.id;
+      const item = action.payload;
+      let cartPrice = state.cart.totalPrice;
+      let newCart;
+      const cart = state.cart.cartItems.slice(); // create a copy of the cart array
+
+      const existingItemIndex = cart.findIndex((item) => item.id === id);
+
+      // item already exists in cart
+      const existingItem = cart[existingItemIndex];
+      if (existingItem.quantity >= 2) {
+        const updatedItem = {
+          ...existingItem,
+          quantity: +existingItem.quantity - 1,
+        };
+        cartPrice += -item.price;
+        cart[existingItemIndex] = updatedItem;
+        newCart = cart;
+      } else {
+        cartPrice -= +item.price;
+        newCart = cart.filter((item) => item.id != id);
+      }
+
+      state.cart = {
+        cartItems: newCart,
+        totalPrice: cartPrice,
+        visibility: state.visibility,
+      };
+    },
+    toggleCart(state) {
+      state.cart.visibility = !state.cart.visibility;
     },
   },
 });
